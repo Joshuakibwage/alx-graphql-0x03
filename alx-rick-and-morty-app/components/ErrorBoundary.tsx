@@ -1,14 +1,8 @@
 import React from "react";
+import { State } from "@/interfaces/index";
+import { ErrorBoundaryProps } from "@/interfaces/index";
+import * as Sentry from '@sentry/react';
 
-
-
-interface State {
-  hasError: boolean;
-}
-
-interface ErrorBoundaryProps {
-  children: ReactNode;
-}
 
 
 class ErrorBoundary extends React.Component<ErrorBoundaryProps , State> {
@@ -17,12 +11,14 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps , State> {
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(_error: Error): State {
     return { hasError: true };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.log({ error, errorInfo });
+    Sentry.captureException(error, {
+       extra: { componentStack: errorInfo.componentStack },
+    })
   }
 
   render() {
